@@ -4,6 +4,20 @@ A modern, web-based application for managing patients, lab tests, appointments, 
 
 ---
 
+## 🔐 Database Connection
+- **Host:** localhost
+- **Port:** 3306
+- **Username:** labadmin
+- **Password:** Lab12345
+- **Database:** lab_management
+
+To test the connection:
+```bash
+mysql -u labadmin -pLab12345 -h localhost
+```
+
+---
+
 ## 🚀 Features
 - Dashboard with real-time statistics
 - Patient management (add, edit, view, delete)

@@ -5,7 +5,7 @@ const dbConfig = {
 };
 
 // API Configuration
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://208.109.215.53:3003/api';
 
 // Utility Functions
 const formatDate = (date) => {
@@ -563,7 +563,7 @@ const reportTemplates = {
                 <style>
                     body { font-family: Arial, sans-serif; background: #f6f7fb; margin: 0; padding: 0; }
                     .header { background: #2d6b37; color: #fff; padding: 20px 30px; display: flex; align-items: center; }
-                    .header-logo { font-size: 2em; font-weight: bold; margin-right: 20px; }
+                    /* .header-logo { font-size: 2em; font-weight: bold; margin-right: 20px; } */
                     .header-title { font-size: 1.5em; font-weight: bold; }
                     .main { display: flex; padding: 30px; }
                     .sidebar { width: 260px; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; margin-right: 30px; padding: 20px; }
@@ -587,7 +587,7 @@ const reportTemplates = {
             </head>
             <body>
                 <div class="header">
-                    <div class="header-logo">S</div>
+                    <!-- Removed the logo letter -->
                     <div class="header-title">SAEED LABORATORY</div>
                     <button class="print-btn" onclick="window.print()">PRINT REPORT</button>
                 </div>
@@ -965,22 +965,15 @@ const searchTests = async (query) => {
 // Dashboard Statistics Functions
 const getDashboardStats = async () => {
     try {
-        // Get mock data
-        const tests = storage.get('mockTests');
-        if (!tests) {
-            throw new Error('No test data available');
+        const response = await fetch(`${API_BASE_URL}/stats`);
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch dashboard stats');
         }
-
-        // Calculate statistics
-        const today = new Date().toLocaleDateString('en-CA');
-        return {
-            totalTests: tests.length,
-            pendingTests: tests.filter(t => t.status === 'pending').length,
-            todayPatients: tests.filter(t => t.date === today).length,
-            completedTests: tests.filter(t => t.status === 'completed').length
-        };
+        return await response.json();
     } catch (error) {
         console.error('Error getting dashboard stats:', error);
+        showNotification(error.message, 'danger');
         throw error;
     }
 };
@@ -1094,10 +1087,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // UI Update Functions
 const updateDashboardStats = (stats) => {
-    document.querySelector('.stat-card:nth-child(1) h2').textContent = stats.totalTests;
-    document.querySelector('.stat-card:nth-child(2) h2').textContent = stats.pendingTests;
-    document.querySelector('.stat-card:nth-child(3) h2').textContent = stats.todayPatients;
-    document.querySelector('.stat-card:nth-child(4) h2').textContent = stats.completedTests;
+    try {
+        const statCards = document.querySelectorAll('.stat-card h2');
+        if (statCards.length >= 4) {
+            statCards[0].textContent = stats.totalTests || '0';
+            statCards[1].textContent = stats.pendingTests || '0';
+            statCards[2].textContent = stats.todayPatients || '0';
+            statCards[3].textContent = stats.completedTests || '0';
+        } else {
+            console.warn('Dashboard stat cards not found in the DOM');
+        }
+    } catch (error) {
+        console.warn('Error updating dashboard stats:', error);
+    }
 };
 
 const updateSearchResults = (results) => {
@@ -1189,15 +1191,16 @@ async function loadDashboardStats() {
 // Load recent tests
 async function loadRecentTests() {
     try {
-        const response = await fetch('/api/tests');
+        const response = await fetch(`${API_BASE_URL}/tests/recent`);
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch recent tests');
+        }
         const tests = await response.json();
         
         const tbody = document.querySelector('table tbody');
-        tbody.innerHTML = '';
-        
-        tests.forEach(test => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
+        tbody.innerHTML = tests.map(test => `
+            <tr>
                 <td>#${test.id}</td>
                 <td>${test.patient_name}</td>
                 <td>${test.test_type}</td>
@@ -1207,11 +1210,11 @@ async function loadRecentTests() {
                     <button class="btn btn-sm btn-outline-primary" onclick="viewTest(${test.id})">View</button>
                     <button class="btn btn-sm btn-outline-secondary" onclick="printReport(${test.id})">Print</button>
                 </td>
-            `;
-            tbody.appendChild(tr);
-        });
+            </tr>
+        `).join('');
     } catch (error) {
         console.error('Error loading recent tests:', error);
+        showNotification(error.message, 'danger');
     }
 }
 
@@ -1241,7 +1244,7 @@ async function submitNewTest() {
     const formData = new FormData(form);
     
     try {
-        const response = await fetch('/api/tests', {
+        const response = await fetch(`${API_BASE_URL}/tests`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1255,15 +1258,20 @@ async function submitNewTest() {
             })
         });
         
-        if (response.ok) {
-            const newTestModal = bootstrap.Modal.getInstance(document.getElementById('newTestModal'));
-            newTestModal.hide();
-            form.reset();
-            loadRecentTests();
-            loadDashboardStats();
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to add test');
         }
+
+        const newTestModal = bootstrap.Modal.getInstance(document.getElementById('newTestModal'));
+        newTestModal.hide();
+        form.reset();
+        showNotification('Test added successfully');
+        loadRecentTests();
+        loadDashboardStats();
     } catch (error) {
         console.error('Error submitting new test:', error);
+        showNotification(error.message, 'danger');
     }
 }
 
@@ -1273,7 +1281,7 @@ async function submitNewPatient() {
     const formData = new FormData(form);
     
     try {
-        const response = await fetch('/api/patients', {
+        const response = await fetch(`${API_BASE_URL}/patients`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1288,33 +1296,40 @@ async function submitNewPatient() {
             })
         });
         
-        if (response.ok) {
-            const addPatientModal = bootstrap.Modal.getInstance(document.getElementById('addPatientModal'));
-            addPatientModal.hide();
-            form.reset();
-            loadPatients();
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to add patient');
         }
+
+        const addPatientModal = bootstrap.Modal.getInstance(document.getElementById('addPatientModal'));
+        addPatientModal.hide();
+        form.reset();
+        showNotification('Patient added successfully');
+        loadPatients();
     } catch (error) {
         console.error('Error submitting new patient:', error);
+        showNotification(error.message, 'danger');
     }
 }
 
 // View test details
 const viewTest = async (testId) => {
     try {
-        // Get test data from mock data
-        const tests = storage.get('mockTests');
-        const test = tests.find(t => t.id === parseInt(testId));
+        const response = await fetch(`${API_BASE_URL}/tests/${testId}`);
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch test details');
+        }
+        const test = await response.json();
         
         if (test) {
-            // Show report preview
             showReportPreview(testId);
         } else {
-            showNotification('Test not found', 'danger');
+            throw new Error('Test not found');
         }
     } catch (error) {
         console.error('Error viewing test:', error);
-        showNotification('Error viewing test: ' + error.message, 'danger');
+        showNotification(error.message, 'danger');
     }
 };
 
@@ -1355,90 +1370,84 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Function to load tests
-    function loadTests() {
-        // First try to get from localStorage
-        const cachedTests = storage.get('tests');
-        if (cachedTests) {
-            updateTestsTable(cachedTests);
+    async function loadTests() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/tests`);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to fetch tests');
+            }
+            const data = await response.json();
+            updateTestsTable(data);
+        } catch (error) {
+            console.error('Error loading tests:', error);
+            showNotification(error.message, 'danger');
         }
-
-        // Then fetch from server
-        fetch('/api/tests')
-            .then(response => response.json())
-            .then(data => {
-                // Save to localStorage
-                storage.save('tests', data);
-                // Update table
-                updateTestsTable(data);
-            })
-            .catch(error => {
-                console.error('Error loading tests:', error);
-                // If server fails, use cached data if available
-                if (cachedTests) {
-                    showNotification('Using cached data. Some information may be outdated.', 'warning');
-                }
-            });
     }
 
     // Function to load patients
-    function loadPatients() {
-        // First try to get from localStorage
-        const cachedPatients = storage.get('patients');
-        if (cachedPatients) {
-            updatePatientsTable(cachedPatients);
+    async function loadPatients() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/patients`);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to fetch patients');
+            }
+            const data = await response.json();
+            updatePatientsTable(data);
+        } catch (error) {
+            console.error('Error loading patients:', error);
+            showNotification(error.message, 'danger');
         }
-
-        // Then fetch from server
-        fetch('/api/patients')
-            .then(response => response.json())
-            .then(data => {
-                // Save to localStorage
-                storage.save('patients', data);
-                // Update table
-                updatePatientsTable(data);
-            })
-            .catch(error => {
-                console.error('Error loading patients:', error);
-                // If server fails, use cached data if available
-                if (cachedPatients) {
-                    showNotification('Using cached data. Some information may be outdated.', 'warning');
-                }
-            });
     }
 
     // Function to load reports
-    function loadReports() {
-        fetch('/api/reports')
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById('reportsTableBody');
-                tbody.innerHTML = data.map(report => `
-                    <tr>
-                        <td>#${report.id}</td>
-                        <td>${report.patient_name}</td>
-                        <td>${report.test_type}</td>
-                        <td>${new Date(report.date).toLocaleDateString()}</td>
-                        <td><span class="badge bg-${report.status === 'completed' ? 'success' : 'warning'}">${report.status}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary" onclick="viewReport(${report.id})">View</button>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="printReport(${report.id})">Print</button>
-                        </td>
-                    </tr>
-                `).join('');
-            })
-            .catch(error => console.error('Error loading reports:', error));
+    async function loadReports() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/reports`);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to fetch reports');
+            }
+            const data = await response.json();
+            
+            const tbody = document.getElementById('reportsTableBody');
+            tbody.innerHTML = data.map(report => `
+                <tr>
+                    <td>#${report.id}</td>
+                    <td>${report.patient_name}</td>
+                    <td>${report.test_type}</td>
+                    <td>${new Date(report.date).toLocaleDateString()}</td>
+                    <td><span class="badge bg-${report.status === 'completed' ? 'success' : 'warning'}">${report.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewReport(${report.id})">View</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="printReport(${report.id})">Print</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading reports:', error);
+            showNotification(error.message, 'danger');
+        }
     }
 
     // Function to load settings
-    function loadSettings() {
-        fetch('/api/settings')
-            .then(response => response.json())
-            .then(data => {
-                document.querySelector('input[name="labName"]').value = data.labName || '';
-                document.querySelector('textarea[name="address"]').value = data.address || '';
-                document.querySelector('input[name="contactNumber"]').value = data.contactNumber || '';
-            })
-            .catch(error => console.error('Error loading settings:', error));
+    async function loadSettings() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/settings`);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to fetch settings');
+            }
+            const data = await response.json();
+            
+            document.querySelector('input[name="labName"]').value = data.labName || '';
+            document.querySelector('textarea[name="address"]').value = data.address || '';
+            document.querySelector('input[name="contactNumber"]').value = data.contactNumber || '';
+        } catch (error) {
+            console.error('Error loading settings:', error);
+            showNotification(error.message, 'danger');
+        }
     }
 
     // Helper function to calculate age from date of birth
@@ -2018,7 +2027,13 @@ const generateMockData = () => {
     storage.save('mockAppointments', mockAppointments);
     storage.save('mockPayments', mockPayments);
 
-    return { mockPatients, mockTests, mockTestTypes, mockAppointments, mockPayments };
+    return { 
+        mockPatients, 
+        mockTests, 
+        mockTestTypes: testTypes, 
+        mockAppointments, 
+        mockPayments 
+    };
 };
 
 // Initialize mock data and load it into the UI
