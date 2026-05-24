@@ -6,10 +6,12 @@ name: Deploy GitHub Pages (main + lab-management)
 
 on:
   push:
-    branches: [master, main, Extra]
+    branches: [master, main]
     paths:
       - 'index.html'
       - 'script.js'
+      - 'privacy.htm'
+      - 'terms.htm'
       - 'public/lab-management/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
@@ -42,7 +44,7 @@ jobs:
           mkdir -p "$DEST/lab-management"
 
           # Main page (repo root) — unchanged URL: https://zub165.github.io/Lab-Report/
-          for f in index.html script.js config.production.js; do
+          for f in index.html script.js config.production.js privacy.htm terms.htm; do
             if [ -f "$f" ]; then
               cp "$f" "$DEST/"
             fi
