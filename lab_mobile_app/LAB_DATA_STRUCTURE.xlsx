@@ -1,0 +1,175 @@
+# Lab Mobile App - Complete Data Structure
+
+## TAB 1: PATIENTS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| patient_id | VARCHAR(20) | Yes | Unique patient identifier | P001, P002 |
+| full_name | VARCHAR(100) | Yes | Patient's full name | John Doe |
+| date_of_birth | DATE | Yes | Date of birth | 1990-05-15 |
+| gender | VARCHAR(10) | Yes | Gender (Male/Female/Other) | Male |
+| phone | VARCHAR(20) | Yes | Contact phone number | +1234567890 |
+| email | VARCHAR(100) | No | Email address | john@example.com |
+| address | TEXT | No | Full address | 123 Main St, City |
+| emergency_contact | VARCHAR(20) | No | Emergency contact number | +1234567891 |
+| medical_history | TEXT | No | Medical history notes | Diabetes, Hypertension |
+| blood_type | VARCHAR(5) | No | Blood type | A+, B-, O+ |
+| insurance_info | TEXT | No | Insurance details | Blue Cross, Policy#123 |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+| updated_at | TIMESTAMP | Yes | Last update date | 2024-01-01 10:00:00 |
+
+## TAB 2: TESTS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| test_id | VARCHAR(20) | Yes | Unique test identifier | T001, T002 |
+| patient_id | VARCHAR(20) | Yes | Reference to patient | P001 |
+| test_type | VARCHAR(50) | Yes | Type of test | Blood Test, Urine Analysis |
+| test_name | VARCHAR(100) | Yes | Specific test name | CBC, Lipid Profile |
+| description | TEXT | No | Test description | Complete Blood Count |
+| price | DECIMAL(10,2) | Yes | Test price | 150.00 |
+| status | VARCHAR(20) | Yes | Test status | Pending, In Progress, Completed |
+| priority | VARCHAR(20) | Yes | Priority level | Normal, Urgent, Emergency |
+| ordered_by | VARCHAR(100) | No | Doctor who ordered | Dr. Smith |
+| ordered_date | TIMESTAMP | Yes | Order date | 2024-01-01 10:00:00 |
+| completed_date | TIMESTAMP | No | Completion date | 2024-01-01 15:00:00 |
+| results | TEXT | No | Test results summary | Normal, Abnormal |
+| notes | TEXT | No | Additional notes | Patient fasting required |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+| updated_at | TIMESTAMP | Yes | Last update date | 2024-01-01 10:00:00 |
+
+## TAB 3: TEST_RESULTS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| result_id | VARCHAR(20) | Yes | Unique result identifier | R001, R002 |
+| test_id | VARCHAR(20) | Yes | Reference to test | T001 |
+| parameter | VARCHAR(100) | Yes | Test parameter name | Hemoglobin, WBC |
+| value | VARCHAR(50) | Yes | Test result value | 14.5, 7500 |
+| unit | VARCHAR(20) | No | Unit of measurement | g/dL, cells/μL |
+| reference_range | VARCHAR(50) | No | Normal range | 12.0-16.0, 4500-11000 |
+| is_abnormal | BOOLEAN | Yes | Abnormal flag | true, false |
+| notes | TEXT | No | Result notes | Slightly elevated |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+
+## TAB 4: APPOINTMENTS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| appointment_id | VARCHAR(20) | Yes | Unique appointment identifier | A001, A002 |
+| patient_id | VARCHAR(20) | Yes | Reference to patient | P001 |
+| appointment_date | DATE | Yes | Appointment date | 2024-01-01 |
+| appointment_time | TIME | Yes | Appointment time | 10:00:00 |
+| test_type | VARCHAR(50) | Yes | Type of test | Blood Test |
+| doctor_name | VARCHAR(100) | No | Doctor name | Dr. Smith |
+| status | VARCHAR(20) | Yes | Appointment status | Scheduled, Completed |
+| notes | TEXT | No | Appointment notes | Fasting required |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+| updated_at | TIMESTAMP | Yes | Last update date | 2024-01-01 10:00:00 |
+
+## TAB 5: PAYMENTS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| payment_id | VARCHAR(20) | Yes | Unique payment identifier | PAY001, PAY002 |
+| test_id | VARCHAR(20) | Yes | Reference to test | T001 |
+| amount | DECIMAL(10,2) | Yes | Payment amount | 150.00 |
+| payment_method | VARCHAR(20) | Yes | Payment method | Cash, Card, Insurance |
+| status | VARCHAR(20) | Yes | Payment status | Pending, Completed |
+| transaction_id | VARCHAR(50) | No | Transaction reference | TXN123456 |
+| payment_date | TIMESTAMP | Yes | Payment date | 2024-01-01 10:00:00 |
+| notes | TEXT | No | Payment notes | Insurance claim pending |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+| updated_at | TIMESTAMP | Yes | Last update date | 2024-01-01 10:00:00 |
+
+## TAB 6: USERS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| user_id | VARCHAR(20) | Yes | Unique user identifier | U001, U002 |
+| username | VARCHAR(50) | Yes | Username for login | admin, doctor1 |
+| email | VARCHAR(100) | Yes | Email address | admin@lab.com |
+| full_name | VARCHAR(100) | Yes | Full name | John Admin |
+| role | VARCHAR(20) | Yes | User role | Admin, Doctor, Technician |
+| is_active | BOOLEAN | Yes | Active status | true, false |
+| last_login | TIMESTAMP | No | Last login date | 2024-01-01 10:00:00 |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+| updated_at | TIMESTAMP | Yes | Last update date | 2024-01-01 10:00:00 |
+
+## TAB 7: REPORT_TEMPLATES
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| template_id | VARCHAR(20) | Yes | Unique template identifier | TEMP001 |
+| name | VARCHAR(100) | Yes | Template name | CBC Report Template |
+| test_type | VARCHAR(50) | Yes | Associated test type | Blood Test (CBC) |
+| description | TEXT | No | Template description | Complete Blood Count Report |
+| header_template | TEXT | No | Report header template | COMPLETE BLOOD COUNT |
+| footer_template | TEXT | No | Report footer template | Reviewed by: {doctor} |
+| is_active | BOOLEAN | Yes | Active status | true, false |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+| updated_at | TIMESTAMP | Yes | Last update date | 2024-01-01 10:00:00 |
+
+## TAB 8: REPORT_FIELDS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| field_id | VARCHAR(20) | Yes | Unique field identifier | FIELD001 |
+| template_id | VARCHAR(20) | Yes | Reference to template | TEMP001 |
+| name | VARCHAR(50) | Yes | Field name | hemoglobin, wbc |
+| label | VARCHAR(100) | Yes | Display label | Hemoglobin, White Blood Cells |
+| type | VARCHAR(20) | Yes | Field type | number, text, textarea |
+| unit | VARCHAR(20) | No | Unit of measurement | g/dL, cells/μL |
+| normal_range | VARCHAR(50) | No | Normal range | 12.0-16.0, 4500-11000 |
+| default_value | VARCHAR(50) | No | Default value | 0, Normal |
+| is_required | BOOLEAN | Yes | Required field | true, false |
+| order | INTEGER | Yes | Display order | 1, 2, 3 |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+
+## TAB 9: REPORTS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| report_id | VARCHAR(20) | Yes | Unique report identifier | REP001 |
+| test_id | VARCHAR(20) | Yes | Reference to test | T001 |
+| template_id | VARCHAR(20) | Yes | Reference to template | TEMP001 |
+| patient_name | VARCHAR(100) | Yes | Patient name | John Doe |
+| test_type | VARCHAR(50) | Yes | Test type | Blood Test (CBC) |
+| test_date | DATE | Yes | Test date | 2024-01-01 |
+| field_values | JSON | Yes | Field values | {"hemoglobin": "14.5", "wbc": "7500"} |
+| doctor_name | VARCHAR(100) | No | Doctor name | Dr. Smith |
+| technician_name | VARCHAR(100) | No | Technician name | Tech Johnson |
+| status | VARCHAR(20) | Yes | Report status | Draft, Completed |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+| updated_at | TIMESTAMP | Yes | Last update date | 2024-01-01 10:00:00 |
+
+## TAB 10: SETTINGS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| setting_id | VARCHAR(20) | Yes | Unique setting identifier | SET001 |
+| setting_key | VARCHAR(100) | Yes | Setting key | lab_name, contact_info |
+| setting_value | TEXT | Yes | Setting value | "Saied Lab", "Contact details" |
+| setting_type | VARCHAR(20) | Yes | Value type | string, number, boolean |
+| description | TEXT | No | Setting description | Laboratory name |
+| is_active | BOOLEAN | Yes | Active status | true, false |
+| created_at | TIMESTAMP | Yes | Record creation date | 2024-01-01 10:00:00 |
+| updated_at | TIMESTAMP | Yes | Last update date | 2024-01-01 10:00:00 |
+
+## TAB 11: AUDIT_LOGS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| log_id | VARCHAR(20) | Yes | Unique log identifier | LOG001 |
+| user_id | VARCHAR(20) | No | User who performed action | U001 |
+| action | VARCHAR(50) | Yes | Action performed | CREATE, UPDATE, DELETE |
+| table_name | VARCHAR(50) | Yes | Table affected | patients, tests |
+| record_id | VARCHAR(20) | Yes | Record identifier | P001, T001 |
+| old_values | JSON | No | Previous values | {"name": "John"} |
+| new_values | JSON | No | New values | {"name": "John Doe"} |
+| ip_address | VARCHAR(45) | No | IP address | 192.168.1.1 |
+| user_agent | TEXT | No | User agent string | Mozilla/5.0... |
+| created_at | TIMESTAMP | Yes | Log creation date | 2024-01-01 10:00:00 |
+
+## TAB 12: NOTIFICATIONS
+| Field Name | Data Type | Required | Description | Example |
+|------------|-----------|----------|-------------|---------|
+| notification_id | VARCHAR(20) | Yes | Unique notification identifier | NOT001 |
+| user_id | VARCHAR(20) | Yes | Target user | U001 |
+| title | VARCHAR(100) | Yes | Notification title | Test Results Ready |
+| message | TEXT | Yes | Notification message | Test results for patient John Doe |
+| type | VARCHAR(20) | Yes | Notification type | info, warning, error |
+| is_read | BOOLEAN | Yes | Read status | false, true |
+| related_id | VARCHAR(20) | No | Related record | T001 |
+| related_type | VARCHAR(20) | No | Related table | tests |
+| created_at | TIMESTAMP | Yes | Creation date | 2024-01-01 10:00:00 |
+| read_at | TIMESTAMP | No | Read date | 2024-01-01 11:00:00 |

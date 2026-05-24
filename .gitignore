@@ -15,4 +15,7 @@ yarn-error.log
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Large mobile archives (source lives in lab_mobile_app/)
+lab_mobile_app.zip 
