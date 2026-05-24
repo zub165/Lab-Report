@@ -1,0 +1,79 @@
+# GitHub Pages: keep main site at /Lab-Report/ and Saeed Lab web UI at /Lab-Report/lab-management/
+# Prereqs: Settings → Pages → Source: GitHub Actions
+# Optional repo variable LAB_API_URL (e.g. https://api.mywaitime.com/lab)
+
+name: Deploy GitHub Pages (main + lab-management)
+
+on:
+  push:
+    branches: [master, main, Extra]
+    paths:
+      - 'index.html'
+      - 'script.js'
+      - 'public/lab-management/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages-lab-report
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build combined Pages site
+        env:
+          LAB_API_URL: ${{ vars.LAB_API_URL }}
+        run: |
+          set -e
+          DEST="$RUNNER_TEMP/pages-root"
+          rm -rf "$DEST"
+          mkdir -p "$DEST/lab-management"
+
+          # Main page (repo root) — unchanged URL: https://zub165.github.io/Lab-Report/
+          for f in index.html script.js config.production.js; do
+            if [ -f "$f" ]; then
+              cp "$f" "$DEST/"
+            fi
+          done
+
+          # Side page: https://zub165.github.io/Lab-Report/lab-management/
+          cp -a public/lab-management/. "$DEST/lab-management/"
+
+          if [ -n "${LAB_API_URL:-}" ]; then
+            export DEST
+            python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p = Path(os.environ["DEST"]) / "lab-management" / "index.html"
+          html = p.read_text(encoding="utf-8")
+          api = os.environ["LAB_API_URL"].rstrip("/")
+          tag = f'    <meta name="saeedlab-api-base" content="{api}">\n'
+          if 'name="saeedlab-api-base"' not in html:
+              html = html.replace("<head>", "<head>\n" + tag, 1)
+          p.write_text(html, encoding="utf-8")
+          PY
+          fi
+
+          test -f "$DEST/index.html"
+          test -f "$DEST/lab-management/index.html"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/pages-root
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
