@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAEED Laboratory — Graphify (demo charts)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --accent: #3498db;
+      --muted: #7f8c8d;
+      --card: #ffffff;
+      --bg: #ecf0f1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: #333;
+      line-height: 1.5;
+    }
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+      color: #fff;
+      padding: 1.5rem 1.25rem 2rem;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.65rem;
+      font-weight: 700;
+    }
+    header p {
+      margin: 0;
+      opacity: 0.92;
+      font-size: 0.95rem;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: -1.25rem auto 2rem;
+      padding: 0 1rem;
+    }
+    .note {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      border-left: 4px solid var(--accent);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      gap: 1.25rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 768px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 1rem 1rem 0.5rem;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    }
+    .card h2 {
+      margin: 0 0 0.25rem;
+      font-size: 1rem;
+      color: var(--primary);
+    }
+    .card .sub {
+      margin: 0 0 0.75rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .chart-box {
+      position: relative;
+      height: 240px;
+      margin-bottom: 0.5rem;
+    }
+    .chart-box.tall { height: 280px; }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Graphify — Lab dashboard preview</h1>
+    <p>Static demo mirroring Flutter <code>fl_chart</code> views (activity, patients, tests, reports)</p>
+  </header>
+
+  <div class="wrap">
+    <div class="note">
+      <strong>How to view:</strong> open this file in Chrome, Safari, or Edge (<code>graphify.html</code>).
+      Charts use sample data; your app loads live data from the Django API.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Activity overview</h2>
+        <p class="sub">Patients · Tests · Appointments · Payments (same idea as main Dashboard)</p>
+        <div class="chart-box tall"><canvas id="chartActivity"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Patients by gender</h2>
+        <p class="sub">Mini-chart style from Patients tab</p>
+        <div class="chart-box tall"><canvas id="chartGender"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Tests by status</h2>
+        <p class="sub">Top statuses from Tests tab bar chart</p>
+        <div class="chart-box"><canvas id="chartTests"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Reports by status</h2>
+        <p class="sub">Draft · Pending · Done · Other</p>
+        <div class="chart-box"><canvas id="chartReports"></canvas></div>
+      </div>
+      <div class="card" style="grid-column: 1 / -1;">
+        <h2>Test types distribution</h2>
+        <p class="sub">Analytics-style pie (sample mix)</p>
+        <div class="chart-box tall"><canvas id="chartTypes"></canvas></div>
+      </div>
+      <div class="card" style="grid-column: 1 / -1;">
+        <h2>Revenue by period</h2>
+        <p class="sub">Month · Quarter · Year (sample $)</p>
+        <div class="chart-box"><canvas id="chartRevenue"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    SAEED Laboratory · <code>lab_mobile_app</code> · Graphify HTML demo (Chart.js)
+  </footer>
+
+  <script>
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.color = "#555";
+
+    const colors = {
+      blue: "#1976d2",
+      green: "#43a047",
+      orange: "#fb8c00",
+      purple: "#8e24aa",
+      pink: "#e91e63",
+      teal: "#00897b",
+      slate: "#546e7a",
+    };
+
+    new Chart(document.getElementById("chartActivity"), {
+      type: "bar",
+      data: {
+        labels: ["Patients", "Tests", "Appts", "Payments"],
+        datasets: [{
+          label: "Count",
+          data: [24, 18, 11, 9],
+          backgroundColor: [colors.blue, colors.green, colors.orange, colors.purple],
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        },
+      },
+    });
+
+    new Chart(document.getElementById("chartGender"), {
+      type: "doughnut",
+      data: {
+        labels: ["Male", "Female", "Other"],
+        datasets: [{
+          data: [14, 9, 1],
+          backgroundColor: [colors.blue, colors.pink, colors.teal],
+          borderWidth: 2,
+          borderColor: "#fff",
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: "right" },
+        },
+      },
+    });
+
+    new Chart(document.getElementById("chartTests"), {
+      type: "bar",
+      data: {
+        labels: ["Completed", "Pending", "Cancelled"],
+        datasets: [{
+          label: "Tests",
+          data: [22, 7, 2],
+          backgroundColor: [colors.green, colors.orange, "#e53935"],
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true } },
+      },
+    });
+
+    new Chart(document.getElementById("chartReports"), {
+      type: "bar",
+      data: {
+        labels: ["Draft", "Pending", "Done", "Other"],
+        datasets: [{
+          data: [5, 3, 12, 2],
+          backgroundColor: [colors.slate, colors.orange, colors.green, "#9e9e9e"],
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+
+    new Chart(document.getElementById("chartTypes"), {
+      type: "pie",
+      data: {
+        labels: ["CBC", "BMP", "Lipid", "Thyroid", "Other"],
+        datasets: [{
+          data: [8, 5, 4, 3, 2],
+          backgroundColor: ["#1e88e5", "#43a047", "#fb8c00", "#8e24aa", "#78909c"],
+          borderWidth: 2,
+          borderColor: "#fff",
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "right" } },
+      },
+    });
+
+    new Chart(document.getElementById("chartRevenue"), {
+      type: "bar",
+      data: {
+        labels: ["This month", "This quarter", "This year"],
+        datasets: [{
+          label: "USD",
+          data: [12400, 38200, 118500],
+          backgroundColor: "#6a1b9a",
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => "$" + ctx.raw.toLocaleString(),
+            },
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: (v) => "$" + Number(v).toLocaleString(),
+            },
+          },
+        },
+      },
+    });
+  </script>
+</body>
+</html>

@@ -5,7 +5,7 @@ const dbConfig = {
 };
 
 // API Configuration
-const API_BASE_URL = 'http://208.109.215.53:3003/api';
+const API_BASE_URL = window.location.origin + '/api';
 
 // Utility Functions
 const formatDate = (date) => {
@@ -1086,6 +1086,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // UI Update Functions
+let testsChart, statusChart;
+
 const updateDashboardStats = (stats) => {
     try {
         const statCards = document.querySelectorAll('.stat-card h2');
@@ -1097,8 +1099,46 @@ const updateDashboardStats = (stats) => {
         } else {
             console.warn('Dashboard stat cards not found in the DOM');
         }
+        updateCharts(stats);
     } catch (error) {
         console.warn('Error updating dashboard stats:', error);
+    }
+};
+
+const updateCharts = (stats) => {
+    const ctx1 = document.getElementById('testsChart')?.getContext('2d');
+    const ctx2 = document.getElementById('statusChart')?.getContext('2d');
+    
+    if (testsChart) testsChart.destroy();
+    if (statusChart) statusChart.destroy();
+    
+    if (ctx1) {
+        testsChart = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Total', 'Pending', 'Today', 'Completed'],
+                datasets: [{
+                    label: 'Tests',
+                    data: [stats.totalTests || 0, stats.pendingTests || 0, stats.todayPatients || 0, stats.completedTests || 0],
+                    backgroundColor: ['#2c3e50', '#e74c3c', '#34db', '#2ecc71']
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+    }
+    
+    if (ctx2) {
+        statusChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Pending', 'Other'],
+                datasets: [{
+                    data: [stats.completedTests || 0, stats.pendingTests || 0, Math.max(0, (stats.totalTests || 0) - (stats.completedTests || 0) - (stats.pendingTests || 0))],
+                    backgroundColor: ['#2ecc71', '#f39c12', '#e74c3c']
+                }]
+            },
+            options: { responsive: true }
+        });
     }
 };
 
