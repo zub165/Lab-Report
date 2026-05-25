@@ -56,4 +56,39 @@ if [[ "${1:-}" == "--build-release" ]]; then
   exit 0
 fi
 
+if [[ "${1:-}" == "--build-desktop" ]]; then
+  shift
+  VERSION="$(grep '^version:' pubspec.yaml | awk '{print $2}')"
+  echo "Building Saeed Lab desktop ${VERSION}..."
+  flutter pub get
+  OUT="$ROOT/build/release-submission/desktop"
+  mkdir -p "$OUT"
+  HOST="$(uname -s)"
+  if [[ "$HOST" == "Darwin" ]]; then
+    echo "→ macOS (.app)..."
+    flutter build macos --release "${DART_DEFINES[@]}" "$@"
+    APP="build/macos/Build/Products/Release/Saeed Lab.app"
+    if [[ -d "$APP" ]]; then
+      ditto -c -k --sequesterRsrc --keepParent "$APP" "$OUT/SaeedLab-${VERSION}-macos.zip"
+      echo "→ $OUT/SaeedLab-${VERSION}-macos.zip"
+    fi
+  fi
+  if [[ "$HOST" == "Linux" ]]; then
+    echo "→ Linux..."
+    flutter build linux --release "${DART_DEFINES[@]}" "$@"
+    tar -C build/linux/x64/release -czf "$OUT/SaeedLab-${VERSION}-linux-x64.tar.gz" .
+    echo "→ $OUT/SaeedLab-${VERSION}-linux-x64.tar.gz"
+  fi
+  if command -v flutter >/dev/null && flutter doctor -v 2>/dev/null | grep -q "Windows Version"; then
+    echo "→ Windows..."
+    flutter build windows --release "${DART_DEFINES[@]}" "$@"
+    (cd build/windows/x64/runner/Release && zip -qr "$OUT/SaeedLab-${VERSION}-windows-x64.zip" .)
+    echo "→ $OUT/SaeedLab-${VERSION}-windows-x64.zip"
+  fi
+  echo ""
+  echo "Desktop artifacts:"
+  ls -lh "$OUT" 2>/dev/null || echo "(build on target OS: macOS zip on Mac, etc.)"
+  exit 0
+fi
+
 exec flutter run "${DART_DEFINES[@]}" "$@"

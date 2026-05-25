@@ -131,7 +131,7 @@ class _LaboratoryInfoScreenState extends State<LaboratoryInfoScreen> {
       await _api.syncLabGroupScopeFromProfile();
       _labGroupLabel = LabGroupScope.groupName;
       _subscription = await _storeSub.loadLocalStatus();
-      if (!kIsWeb) {
+      if (isMobileStorePlatform) {
         _storeBillingAvailable = await _storeSub.isStoreAvailable;
         _storeProduct = await _storeSub.loadStoreProduct();
       }
@@ -159,7 +159,7 @@ class _LaboratoryInfoScreenState extends State<LaboratoryInfoScreen> {
   }
 
   Future<void> _subscribeLabPlan() async {
-    if (kIsWeb) {
+    if (!isMobileStorePlatform) {
       _showErrorDialog('Subscribe on iPhone or Android using App Store or Google Play.');
       return;
     }
@@ -435,7 +435,7 @@ class _LaboratoryInfoScreenState extends State<LaboratoryInfoScreen> {
                 ],
               ],
             ),
-            if (!kIsWeb && _storeBillingAvailable) ...[
+            if (isMobileStorePlatform && _storeBillingAvailable) ...[
               const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerLeft,

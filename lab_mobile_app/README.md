@@ -205,6 +205,35 @@ flutter build appbundle --release
 flutter build ios --release
 ```
 
+## Desktop (Windows, macOS, Linux)
+
+Flutter desktop targets are enabled for lab staff on computers.
+
+### Prerequisites
+- Flutter SDK with desktop support: `flutter doctor`
+- **macOS**: Xcode 15+, macOS 10.15+
+- **Windows**: Visual Studio 2022 with Desktop development with C++
+- **Linux**: `clang`, `cmake`, `ninja-build`, `pkg-config`, GTK 3
+
+### Build (with `.env`)
+```bash
+cd lab_mobile_app
+cp .env.example .env   # fill API keys
+chmod +x scripts/run_with_env.sh
+./scripts/run_with_env.sh --build-desktop
+```
+
+### Output
+| OS | Artifact |
+|----|----------|
+| **macOS** (on Mac) | `build/release-submission/desktop/SaeedLab-{version}-macos.zip` → **Saeed Lab.app** |
+| **Linux** (on Linux) | `SaeedLab-{version}-linux-x64.tar.gz` |
+| **Windows** (on Windows) | `SaeedLab-{version}-windows-x64.zip` |
+
+Run on macOS: unzip, open **Saeed Lab.app** (System Settings → Privacy → allow if blocked).
+
+**Note:** App Store / Google Play subscriptions are mobile-only. Desktop uses the same lab API, offline SQLite, and per-lab Stripe for patient payments.
+
 ## Deployment
 
 ### Google Play Store

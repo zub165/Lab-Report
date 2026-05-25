@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
@@ -22,16 +23,20 @@ import 'screens/terms_screen.dart';
 import 'services/django_api_service.dart';
 import 'services/store_subscription_service.dart';
 import 'utils/constants.dart';
+import 'utils/desktop_database_init.dart';
 import 'utils/lab_currency.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Set preferred orientations
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+
+  await initDesktopDatabaseIfNeeded();
+
+  if (isMobileStorePlatform) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
   // Initialize shared preferences
   await SharedPreferences.getInstance();

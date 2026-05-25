@@ -20,7 +20,7 @@ class StoreSubscriptionService {
   void Function(String message, {bool isError})? onPurchaseMessage;
 
   Future<void> initialize() async {
-    if (kIsWeb) return;
+    if (kIsWeb || !isMobileStorePlatform) return;
     _purchaseSub ??= _iap.purchaseStream.listen(
       _handlePurchases,
       onError: (Object e) {
@@ -35,7 +35,7 @@ class StoreSubscriptionService {
   }
 
   Future<ProductDetails?> loadStoreProduct() async {
-    if (kIsWeb) return null;
+    if (kIsWeb || !isMobileStorePlatform) return null;
     final response = await _iap.queryProductDetails(
       {LabSubscriptionConfig.storeProductId},
     );
@@ -75,8 +75,8 @@ class StoreSubscriptionService {
   }
 
   Future<bool> subscribeViaStore() async {
-    if (kIsWeb) {
-      throw Exception('In-app purchase is not available on web');
+    if (kIsWeb || !isMobileStorePlatform) {
+      throw Exception('In-app purchase is only available on iPhone and Android');
     }
     final available = await isStoreAvailable;
     if (!available) {
@@ -95,7 +95,7 @@ class StoreSubscriptionService {
   }
 
   Future<void> restorePurchases() async {
-    if (kIsWeb) return;
+    if (kIsWeb || !isMobileStorePlatform) return;
     await _iap.restorePurchases();
   }
 

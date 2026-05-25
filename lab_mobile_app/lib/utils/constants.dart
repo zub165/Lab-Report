@@ -5,6 +5,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_env.dart';
 import 'env_config.dart';
 
+/// iOS/Android only — not web or desktop (Windows, macOS, Linux).
+bool get isMobileStorePlatform {
+  if (kIsWeb) return false;
+  return defaultTargetPlatform == TargetPlatform.iOS ||
+      defaultTargetPlatform == TargetPlatform.android;
+}
+
+/// Windows, macOS, or Linux Flutter embedder.
+bool get isDesktopPlatform {
+  if (kIsWeb) return false;
+  return defaultTargetPlatform == TargetPlatform.windows ||
+      defaultTargetPlatform == TargetPlatform.macOS ||
+      defaultTargetPlatform == TargetPlatform.linux;
+}
+
 /// Avoids "setState/markNeedsBuild during build" when a screen loads data in [State.initState].
 void scheduleProviderNotify(ChangeNotifier notifier) {
   final phase = SchedulerBinding.instance.schedulerPhase;

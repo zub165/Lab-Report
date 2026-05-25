@@ -12,11 +12,11 @@ Copies signed artifacts to `build/release-submission/`:
 
 | File | Store |
 |------|--------|
-| `SaeedLab-2.3.5+27.apk` | Sideload / testing |
-| `SaeedLab-2.3.5+27.aab` | **Google Play** (preferred upload) |
-| `SaeedLab-2.3.5+27.ipa` | **App Store Connect** (Transporter or Xcode) |
+| `SaeedLab-2.3.6+28.apk` | Sideload / testing |
+| `SaeedLab-2.3.6+28.aab` | **Google Play** (preferred upload) |
+| `SaeedLab-2.3.6+28.ipa` | **App Store Connect** (Transporter or Xcode) |
 
-**Version:** `2.3.5+27` — iOS bundle **`com.example.labMobileApp`** (matches App Store Connect); Android package **`com.saiedlab.mobile`**
+**Version:** `2.3.6+28` — iOS bundle **`com.example.labMobileApp`**; Android **`com.saiedlab.mobile`**; privacy URL https://zub165.github.io/Lab-Report/privacy.htm
 
 ### Store subscription (before upload)
 
