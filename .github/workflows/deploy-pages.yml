@@ -10,6 +10,7 @@ on:
     paths:
       - 'index.html'
       - 'script.js'
+      - 'privacy.html'
       - 'privacy.htm'
       - 'terms.htm'
       - 'public/lab-management/**'
@@ -44,7 +45,7 @@ jobs:
           mkdir -p "$DEST/lab-management"
 
           # Main page (repo root) — unchanged URL: https://zub165.github.io/Lab-Report/
-          for f in index.html script.js config.production.js privacy.htm terms.htm; do
+          for f in index.html script.js config.production.js privacy.html privacy.htm terms.htm; do
             if [ -f "$f" ]; then
               cp "$f" "$DEST/"
             fi
